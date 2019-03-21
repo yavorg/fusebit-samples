@@ -1,0 +1,6 @@
+{
+    "engines": {
+      "node": "8"
+    },
+    "dependencies": { "ssh2-sftp-client" : "*", "axios" : "*"}
+  }
