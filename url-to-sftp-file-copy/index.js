@@ -3,6 +3,10 @@ const Path = require('path');
 const Axios = require('axios');
 const Client = require('ssh2-sftp-client');
 
+/**
+* @param ctx {FusebitContext}
+* @param cb {FusebitCallback}
+*/
 module.exports = async (ctx, cb) => {
     const fileUrl = ctx.body.fileToCopy;
     const fileName = fileUrl.substring(fileUrl.lastIndexOf('/')+1);

@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "fusebit": {
+      "runner": "// Return a function that evaluates to a Superagent request promise\n\nctx => Superagent.post(ctx.url)\n    .query({ 'x-fx-logs': 1 })\n    .send({fileToCopy: 'https://s3.us-east-2.amazonaws.com/cdn.5q/demo-assets/demo-50MB.zip'});",
+      "editor": {
+        "ensureFunctionExists": false,
+        "theme": "light",
+        "actionPanel": {
+          "theme": "light",
+          "enableCodeOnlyToggle": true,
+          "enableFullScreen": true,
+          "enableClose": false
+        },
+        "editorPanel": {
+          "theme": "light"
+        },
+        "logsPanel": {
+          "theme": "light",
+          "maxSize": 10240
+        },
+        "navigationPanel": {
+          "theme": "light",
+          "hideCode": false,
+          "hideFiles": [],
+          "hideComputeSettings": true,
+          "hideApplicationSettings": false,
+          "hideCronSettings": false,
+          "hideRunnerTool": false
+        },
+        "statusPanel": {
+          "theme": "light"
+        },
+        "version": "0.9.13"
+      }
+    }
+  },
+  "schedule": {},
+  "fuseVersion": "0.0.7"
+}
