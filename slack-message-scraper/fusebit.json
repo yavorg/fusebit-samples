@@ -1,0 +1,37 @@
+{
+  "configuration": {},
+  "metadata": {
+    "fusebit": {
+      "runner": "// Return a function that evaluates to a Superagent request promise\n\nctx => Superagent.get(ctx.url)\n    .query({ 'x-fx-logs': 1 });\n\n// Simple POST request\n// ctx => Superagent.post(ctx.url)\n//     .query({ 'x-fx-logs': 1 });\n//     .send({ hello: 'world' });\n\n// POST request with Authorization header using function's application settings\n// ctx => Superagent.post(ctx.url)\n//     .query({ 'x-fx-logs': 1 });\n//     .set('Authorization', `Bearer ${ctx.configuration.MY_API_KEY}`)\n//     .send({ hello: 'world' });\n",
+      "editor": {
+        "ensureFunctionExists": false,
+        "theme": "light",
+        "actionPanel": {
+          "theme": "light",
+          "enableCodeOnlyToggle": true,
+          "enableFullScreen": true,
+          "enableClose": false
+        },
+        "editorPanel": {
+          "theme": "light"
+        },
+        "logsPanel": {
+          "theme": "light",
+          "maxSize": 10240
+        },
+        "navigationPanel": {
+          "theme": "light",
+          "hideCode": false,
+          "hideFiles": [],
+          "hideComputeSettings": true,
+          "hideApplicationSettings": false,
+          "hideCronSettings": false,
+          "hideRunnerTool": false
+        },
+        "statusPanel": {
+          "theme": "light"
+        }
+      }
+    }
+  }
+}
