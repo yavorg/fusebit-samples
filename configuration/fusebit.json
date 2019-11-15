@@ -2,8 +2,7 @@
   "fuseVersion": "1.7.0",
   "metadata": {
     "fusebit": {
-      "runner": "// Return a function that evaluates to a Superagent request promise\n\nctx => Superagent.get(ctx.url);\n",
-     }
+      "runner": "// Return a function that evaluates to a Superagent request promise\n\nctx => Superagent.get(ctx.url);\n"
     }
   }
 }
