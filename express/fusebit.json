@@ -1,0 +1,8 @@
+{
+  "fuseVersion": "1.6.0",
+  "metadata": {
+    "fusebit": {
+      "runner": "// Return a function that evaluates to a Superagent request promise\n\nctx => Superagent.get(ctx.url + '/')\n"
+    }
+  }
+}
