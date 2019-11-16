@@ -4,10 +4,7 @@
     "fusebit": {
       "runner": "// Return a function that evaluates to a Superagent request promise\n\nctx => Superagent.post(ctx.url).send({ customerId: 'cust-12345', amount: 12.53 });\n",
       "editor": {
-        "ensureFunctionExists": false,
-        "theme": "light",
         "navigationPanel": {
-          "hideCode": false,
           "hideFiles": [
             "index.js"
           ],
