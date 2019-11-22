@@ -11,7 +11,7 @@
           ],
           "selectFile": "mapping.js",
           "hideScheduleSettings": true,
-          "hideRunnerSettings": true
+          "hideRunnerTool": true
         }
       }
     }
