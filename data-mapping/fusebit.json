@@ -1,0 +1,19 @@
+{
+  "fuseVersion": "1.7.0",
+  "metadata": {
+    "fusebit": {
+      "runner": "ctx => Superagent.get(ctx.url);",
+      "editor": {
+        "navigationPanel": {
+          "hideFiles": [
+            "index.js",
+            "package.json"
+          ],
+          "selectFile": "mapping.js",
+          "hideScheduleSettings": true,
+          "hideRunnerSettings": true
+        }
+      }
+    }
+  }
+}
