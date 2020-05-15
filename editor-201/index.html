@@ -1,0 +1,72 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <title>Fusebit Editor Demo</title>
+    <style>
+        html,body {
+            width: 100%;
+            height: 100%;
+            background: gray;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" style="width:800px; margin-top:30px; margin-left:auto; margin-right:auto">
+        <div id="toolbar" style="width:100%; background: lightskyblue">
+            Custom toolbar
+            <button onclick="handleSave()">Save</button>
+            <button onclick="handleRun()">Run</button>
+        </div>
+        <div id="editor" style="width:100%; height:450px"></div>
+        <div id="status" style="width:100%; background:lightskyblue">Custom status bar</div>
+        <div id="logs-container" class="fusebit-theme-light" style="width:100%; height:100px;">
+            <div id="logs" class="fusebit-logs-container" ></div>
+        </div>
+    </div>
+</body>
+
+<script src="https://cdn.fusebit.io/fusebit/js/fusebit-editor/1/4/0/fusebit-editor.min.js"></script>
+
+<script type="text/javascript">
+    var editorContext = undefined;
+
+    function handleSave() {
+        return editorContext 
+            ? editorContext.saveFunction()
+            : alert('Editor not initialized');
+    }
+
+    function handleRun() {
+        return editorContext 
+            ? editorContext.runFunction()
+            : alert('Editor not initialized');
+    }
+
+    // Create the Fusebit Editor without the logs, status, and action panel
+    fusebit.createEditor(document.getElementById('editor'), 'demo-boundary', 'demo-function', {
+        accountId: '{accountId}',           // e.g. acc-9d9341ea356841ed
+        subscriptionId: '{subscriptionId}', // e.g. sub-ed9d9341ea356841
+        baseUrl: '{baseUrl}',               // e.g. https://stage.us-west-2.fusebit.io
+        accessToken: '{accessToken}',       // e.g. eyJhbGciOiJSUz...
+    }, {
+        template: {},
+        editor: {
+            theme: 'light',
+            actionPanel: false, // hide action panel
+            statusPanel: false, // hide status panel
+            logsPanel: false,   // hide logs panel
+        },
+    }).then(editorContext => {
+        // Create a separate logs panel using the same EditorContext
+        fusebit.createLogsPanel(document.getElementById('logs'), editorContext, { 
+            theme: 'light' 
+        });
+        window.editorContext = editorContext;
+    });
+</script>
+
+</html>  

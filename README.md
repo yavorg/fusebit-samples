@@ -46,3 +46,18 @@ A special case of a domain specific language is a Fusebit function that performs
 ```
 fuse function edit --template fusebit/samples/data-mapping data-mapping
 ```
+
+## Fusebit Editor 201
+
+[Code](editor-201)
+
+This sample demonstrates an application that embeds individual components of the Fusebit Editor to achieve better integration with the desired UI and UX. Specifically: 
+
+1. The default action and status panels of the Fusebit Editor are hidden. 
+2. Custom application toolbar exposes the *Save* and *Run* buttons that trigger the saving and running of the Fusebit function. 
+3. Custom application status bar is located between the editor and the logs panels. 
+4. The logs panel of the Fusebit Editor is used separately from the main editor panel in a custom location on the page. 
+
+The [index.html](editor-201/index.html) is a sample HTML page that embeds the customized Fusebit Editor. Before opening it in the browser, replace the *{accountId}*, *{subscriptionId}*, *{baseUrl}* and *{accessToken}* placeholers with values specific to your deployment. You can generate an access token to experiment with during development using `fuse token -o raw`. 
+
+**NOTE** Functionality demonstrated in this sample requires Fusebit Editor version >= 1.4. 
