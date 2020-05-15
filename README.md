@@ -61,3 +61,35 @@ This sample demonstrates an application that embeds individual components of the
 The [index.html](editor-201/index.html) is a sample HTML page that embeds the customized Fusebit Editor. Before opening it in the browser, replace the *{accountId}*, *{subscriptionId}*, *{baseUrl}* and *{accessToken}* placeholers with values specific to your deployment. You can generate an access token to experiment with during development using `fuse token -o raw`. 
 
 **NOTE** Functionality demonstrated in this sample requires Fusebit Editor version >= 1.4. 
+
+## Fusebit Editor React Component
+
+[Code](editor-react)
+
+THis sample shows how to create a simple React component to host the Fusebit Editor in a React application. 
+
+The [FusebitEditor.tsx](editor-react/FusebitEditor.tsx) contains the React component code in TypeScript. 
+
+You can embed this component in your React application as follows: 
+
+```jsx
+<FusebitEditor
+    version="1" // can be major, major.minor, major.minor.patch, or undefined for latest version
+    boundaryId="{boundaryId}"
+    functionId="{functionId}"
+    account={{
+        accountId: '{accountId}',
+        subscriptionId: '{subscriptionId}',
+        baseUrl: '{baseUrl}',
+        accessToken: '{accessToken}'
+    }}
+    options={{ 
+        template: {},  // IFunctionSpecification
+        editor: {}     // IEditorOptions
+    }}
+    onLoaded={(editorContext: any) => {}}
+    onError={(e: any) => {
+        alert('Fusebit Editor error: ' + e.message);
+    }}
+/>
+```
