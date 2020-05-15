@@ -11,19 +11,61 @@
             width: 100%;
             height: 100%;
             background: gray;
+            font-family: Helvetica, Arial, sans-serif;
+        }
+        #container {
+            width:1000px; 
+            margin-top:30px; 
+            margin-left:auto; 
+            margin-right:auto;
+        }
+        #toolbar {
+            height: 40px;
+            width: 100%; 
+            background-color: white;
+            border-bottom: 4px solid  #ebedef;
+            vertical-align: middle;
+            display: flex;
+            align-items: center; 
+            padding: 10px;
+            box-sizing: border-box; 
+            justify-content: space-between;
+        }
+        #status {
+            width:100%; 
+            height: 40px;
+            background-color: white;
+            border-bottom: 4px solid  #ebedef;
+            border-top: 4px solid  #ebedef;
+            vertical-align: middle;
+            display: flex;
+            align-items: center; 
+            padding: 10px;
+            box-sizing: border-box; 
+        }
+        #editor {
+            width:100%; 
+            height:450px;
+        }
+        #logs-container{
+            width:100%; 
+            height:100px;
         }
     </style>
+    <link type="text/css" rel="stylesheet" href="fusebit-custom.css" />
 </head>
 <body>
-    <div id="container" style="width:800px; margin-top:30px; margin-left:auto; margin-right:auto">
-        <div id="toolbar" style="width:100%; background: lightskyblue">
+    <div id="container">
+        <div id="toolbar">
             Custom toolbar
-            <button onclick="handleSave()">Save</button>
-            <button onclick="handleRun()">Run</button>
+            <div>
+                <button onclick="handleSave()">Save</button>
+                <button onclick="handleRun()">Run</button>
+            </div>
         </div>
-        <div id="editor" style="width:100%; height:450px"></div>
-        <div id="status" style="width:100%; background:lightskyblue">Custom status bar</div>
-        <div id="logs-container" class="fusebit-theme-light" style="width:100%; height:100px;">
+        <div id="editor"></div>
+        <div id="status">Custom status bar</div>
+        <div id="logs-container" class="fusebit-theme-custom">
             <div id="logs" class="fusebit-logs-container" ></div>
         </div>
     </div>
@@ -55,11 +97,17 @@
     }, {
         template: {},
         editor: {
-            theme: 'light',
+            theme: 'custom',
             actionPanel: false, // hide action panel
             statusPanel: false, // hide status panel
             logsPanel: false,   // hide logs panel
+            navigationPanel: {
+                hideConfigurationSettings: true, // hide configuration settings
+                hideScheduleSettings: true, // hide scheduler  settings
+                hideRunnerTool: true,  // hide runner  settings
+            }
         },
+
     }).then(editorContext => {
         // Create a separate logs panel using the same EditorContext
         fusebit.createLogsPanel(document.getElementById('logs'), editorContext, { 
