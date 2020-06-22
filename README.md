@@ -69,7 +69,7 @@ The [fusebit-custom.css](editor-201/fusebit-custom.css) is a sample CSS file wit
 
 [Code](editor-react)
 
-THis sample shows how to create a simple React component to host the Fusebit Editor in a React application. 
+This sample shows how to create a simple React component to host the Fusebit Editor in a React application. 
 
 The [FusebitEditor.tsx](editor-react/FusebitEditor.tsx) contains the React component code in TypeScript. 
 
