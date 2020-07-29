@@ -1,0 +1,84 @@
+const Superagent = require('superagent');
+const Sdk = require('@fusebit/add-on-sdk');
+const initialView = require('fs').readFileSync(__dirname + '/initial.html', { encoding: 'utf8' });
+
+module.exports = {
+    initialState: 'initial',
+    states: {
+
+        initial: async (ctx, state, data) => {
+            // Initiatie authentication
+
+            Sdk.debug('INITIAL', state, data);
+
+            state.configurationState = 'authCallback';
+            state.data = data;
+
+            const selfUrl = Sdk.getSelfUrl(ctx);
+
+            const authorizationUrl = `https://slack.com/oauth/v2/authorize?scope=${
+                encodeURIComponent(ctx.configuration.slack_scope || '')
+            }&client_id=${
+                encodeURIComponent(ctx.configuration.slack_client_id)
+            }&redirect_uri=${
+                encodeURIComponent(selfUrl)
+            }&state=${
+                encodeURIComponent(Sdk.serializeState(state))
+            }`
+
+            const view = initialView
+                .replace(/##templateName##/g, data.templateName)
+                .replace(/##authorizationUrl##/g, authorizationUrl)
+                .replace(/##returnTo##/, JSON.stringify(ctx.query.returnTo))
+                .replace(/##state##/, ctx.query.state ? JSON.stringify(ctx.query.state) : 'null');
+            
+            return {  
+                body: view,
+                bodyEncoding: 'utf8',
+                headers: { 'content-type': 'text/html' },
+                status: 200,
+            };
+        },
+
+        authCallback: async (ctx, state) => {
+            // Process auth callback
+
+            if (ctx.query.code) {
+                const selfUrl = Sdk.getSelfUrl(ctx);
+                let response;
+                try {
+                    response = await Superagent.post(`https://slack.com/api/oauth.v2.access`)
+                        .type('form')
+                        .send({
+                            code: ctx.query.code,
+                            client_id: ctx.configuration.slack_client_id, 
+                            client_secret: ctx.configuration.slack_client_secret,
+                            redirect_uri: selfUrl
+                        });
+                    if (!response || !response.body || !response.body.access_token) {
+                        throw new Error('Unable to obtain access token');
+                    }
+                }
+                catch (e) {
+                    throw { 
+                        status: 500, 
+                        message: `Slack authorization failed: ${e.message}`, 
+                        state 
+                    };
+                }
+                let data = { 
+                    ...state.data, 
+                    slack_access_token: response.body.access_token
+                };
+                return Sdk.completeWithSuccess(state, data);
+            }
+            else {
+                throw { 
+                    status: 500, 
+                    message: `Slack authorization failed: ${ctx.query.error_description || ctx.query.error || 'Unknown error'}`, 
+                    state 
+                };
+            }
+        }
+    }
+};
