@@ -10,9 +10,10 @@ const getTemplateFiles = fileNames => fileNames.reduce((a, c) => {
     return a;
 }, {});
 
-module.exports = async (ctx) => {
+module.exports = async (ctx) => { 
     // Create the Add-On Handler
-    await Sdk.createFunction(ctx, { 
+    await Sdk.createFunction(ctx, {
+        enableStorage: true,
         configurationSerialized: `# Add-on configuration settings
 ${Object.keys(ctx.body.configuration).sort().map(k => `${k}=${ctx.body.configuration[k]}`).join('\n')}
 `,

@@ -35,7 +35,7 @@ const getAccessToken = async (ctx) => {
         })
         .then(res => response = res);
 
-    return response.access_token;
+    return response.body.access_token;
 };
 
 /**

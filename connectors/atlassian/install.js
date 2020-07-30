@@ -34,8 +34,8 @@ fusebit_allowed_return_to=${ctx.body.configuration.fusebit_allowed_return_to}
                         node: "10"
                     },
                     dependencies: {
-                        "@fusebit/add-on-sdk": "^0.0.1",
-                        "superagent": "^5.2.2"
+                        "superagent": "^5.2.2",
+                        "@fusebit/add-on-sdk": "^1.0.5"
                     }
                 },
                 'index.js': getTemplateFile('index.js'),

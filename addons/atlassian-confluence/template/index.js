@@ -3,6 +3,7 @@ const SwaggerClient = require("swagger-client");
 const Superagent = require("superagent");
 const fs = require('fs');
 const unzip = require('util').promisify(require('zlib').unzip);
+const Sdk = require('@fusebit/add-on-sdk');
 
 module.exports = async (ctx) => {
     // First, get an access token
@@ -18,7 +19,10 @@ module.exports = async (ctx) => {
         ...client.apis
     }
 
-    return confluence(sdk, ctx.configuration);
+    return confluence(sdk, {
+        ...ctx.configuration,
+        storage: Sdk.getStorageClient(ctx)
+    });
 }
 
 // API Documentation: https://developer.atlassian.com/cloud/confluence/rest/

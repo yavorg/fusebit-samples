@@ -4,6 +4,7 @@
   },
   "dependencies": {
     "superagent": "^5.2.2",
+    "@fusebit/add-on-sdk": "^1.0.6",
     "swagger-client": "^3.10.8"
   }
 }
