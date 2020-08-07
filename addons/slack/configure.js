@@ -41,7 +41,7 @@ module.exports = {
             // the application that initiated the configuration flow. The application will normally 
             // continue the Add-On installation by invoking the /install endpoint on the Lifecycle Manager. 
 
-            delete data.atlassian_scope;
+            delete data.slack_scope;
 
             const view = form
                 .replace(/##templateName##/g, data.templateName)

@@ -18,6 +18,7 @@ module.exports = {
 
             const authorizationUrl = `https://slack.com/oauth/v2/authorize?scope=${
                 encodeURIComponent(ctx.configuration.slack_scope || '')
+            }${ ctx.configuration.slack_user_scope ? '&user_scope=' + encodeURIComponent(ctx.configuration.slack_user_scope) : ''
             }&client_id=${
                 encodeURIComponent(ctx.configuration.slack_client_id)
             }&redirect_uri=${
@@ -68,7 +69,10 @@ module.exports = {
                 }
                 let data = { 
                     ...state.data, 
-                    slack_access_token: response.body.access_token
+                    slack_bot_access_token: response.body.access_token,
+                    slack_bot_id: response.body.bot_user_id,
+                    slack_user_access_token: response.body.authed_user && response.body.authed_user.access_token,
+                    slack_user_id: response.body.authed_user && response.body.authed_user.id
                 };
                 return Sdk.completeWithSuccess(state, data);
             }

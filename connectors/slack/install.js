@@ -18,8 +18,11 @@ slack_client_id=${ctx.body.configuration.slack_client_id}
 # OAuth Client Secret of the Slack application
 slack_client_secret=${ctx.body.configuration.slack_client_secret}
 
-# OAuth Scopes to request
+# OAuth Bot user token scopes to request
 slack_scope=${ctx.body.configuration.slack_scope || ''}
+
+# OAuth User token scopes to request
+slack_user_scope=${ctx.body.configuration.slack_user_scope || ''}
 
 # Allowed returnTo URLs. Comma delimited. Use wildcard (*) at the end of a URL to allow for a prefix match
 fusebit_allowed_return_to=${ctx.body.configuration.fusebit_allowed_return_to}
