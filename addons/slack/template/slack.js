@@ -19,3 +19,10 @@ module.exports = async (slack, ctx) => {
 
     }  
 }
+
+// If using Events API, each event type will be routed to a function named after
+// the event type https://api.slack.com/events. In addition, all events are routed to the 
+// function below for easy debugging
+// module.exports.all = async (slack, event, ctx) => {
+//     console.log(event);
+// }

@@ -80,10 +80,21 @@
             const [params, setParams] = React.useState({
                 slack_client_id: '',
                 slack_client_secret: '',
+                slack_signing_secret: '',
                 slack_scope: 'channels:read chat:write chat:write.public groups:read im:read mpim:read',
                 slack_user_scope: '',
                 fusebit_allowed_return_to: ''
             });
+            const passwordParams = [
+                'slack_client_secret',
+                'slack_signing_secret',
+            ];
+            const requiredParams = [
+                'slack_client_id',
+                'slack_client_secret',
+                'slack_scope',
+                'fusebit_allowed_return_to'
+            ];
 
             const getReturnUrl = (status, data) => {
                 let url = `${returnTo}?status=${status}&data=${encodeURIComponent(
@@ -121,7 +132,8 @@
                 window.location.href = getReturnUrl("success", newData);
             };
 
-            const hasError = () => !!Object.keys(params).find(p => typeof params[p] === 'string' && !params[p].trim());
+            const hasError = () => !!Object.keys(params).find(p => 
+                typeof params[p] === 'string' && requiredParams.includes(p) && !params[p].trim());
 
             const emptyParam = (p) => !!params[p + '_error'];
 
@@ -132,18 +144,18 @@
                 setParams(newParams);
             };
 
-            const getInput = (p, label, description, password) => (
+            const getInput = (p, label, description) => (
                 <Grid item xs={12}>
                     <TextField
                         id={p}
                         label={label}
-                        helperText={emptyParam(p) && `Required. ${description}` || description}
-                        error={emptyParam(p)}
+                        helperText={(requiredParams.includes(p) && emptyParam(p)) && `Required. ${description}` || description}
+                        error={(requiredParams.includes(p) && emptyParam(p))}
                         variant="outlined"
                         value={params[p]}
                         onChange={handleInput(p)}
                         fullWidth
-                        type={password && "password" || undefined}
+                        type={passwordParams.includes(p) && "password" || undefined}
                     />
                 </Grid>
             );
@@ -158,6 +170,7 @@
                                 <Grid container spacing={2}>
                                     {getInput('slack_client_id', 'Slack Client ID', 'OAuth client ID of your Slack application')}
                                     {getInput('slack_client_secret', 'Slack Client Secret', 'OAuth client secret of the Slack application')}
+                                    {getInput('slack_signing_secret', 'Slack Signing Secret', 'Signing secret of the Slack application, can be omitted if not using Events API')}
                                     {getInput('slack_scope', 'Slack Bot User Token Scopes', 'Default bot OAuth scopes to request, space delimited')}
                                     {getInput('slack_user_scope', 'Slack User Token Scopes', 'Default user OAuth scopes to request, space delimited. Leave blank to not request User token')}
                                     <Grid item xs={12}>
