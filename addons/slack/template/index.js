@@ -22,6 +22,7 @@ module.exports = async (ctx) => {
             try {
                 let body = {
                     app: ctx.configuration.slack_app_id,
+                    team_id: ctx.configuration.slack_team_id,
                     handler: Sdk.getSelfUrl(ctx) + '/events/ingest',
                 };
                 if (ctx.method === 'POST') {
@@ -34,6 +35,7 @@ module.exports = async (ctx) => {
                     response = await Superagent.delete(ctx.configuration.fusebit_events_registration)
                         .set('Authorization', `Bearer ${ctx.configuration.fusebit_events_token}`)
                         .query({ app: body.app })
+                        .query({ team_id: body.team_id })
                         .query({ handler: encodeURIComponent(body.handler) });
                 } else {
                     return {
@@ -72,18 +74,20 @@ module.exports = async (ctx) => {
                 let event = ctx.body;
                 Sdk.debug('Valid event', event);
 
-                let functions = Object.getOwnPropertyNames(slack).filter((p) => typeof slack[p] === 'function');
-                let toInvoke = ['all'];
-                if (functions.includes(event.type)) {
-                    toInvoke.push(event.type);
-                }
+                // Attach all event handlers off a nested `slack` property
+                let handlers = slack.slack;
+                if (handlers) {
+                    let functions = Object.getOwnPropertyNames(handlers).filter((p) => typeof handlers[p] === 'function');
+                    let toInvoke = functions.filter((f) => f == event.type || f == 'all');
 
-                toInvoke.forEach((t) => {
-                    slack[t](sdk, event, {
-                        ...ctx.configuration,
-                        storage: Sdk.getStorageClient(ctx),
+                    Sdk.debug('Invoking handlers', toInvoke);
+                    toInvoke.forEach((t) => {
+                        handlers[t](sdk, event, {
+                            ...ctx.configuration,
+                            storage: Sdk.getStorageClient(ctx),
+                        });
                     });
-                });
+                }
 
                 return {
                     status: 201,

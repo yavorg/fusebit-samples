@@ -1,9 +1,10 @@
 module.exports = async (confluence, ctx) => {
     // Simple caching
     let storage = await ctx.storage.get();
+    const ttl = 180000; // TTL of 3 minutes
 
-    if (storage && storage.timestamp && storage.timestamp > Date.now() - 180000) {
-        // We have a cache with TTL 3 min
+    if (storage && storage.timestamp && storage.timestamp > Date.now() - ttl) {
+        // Cache is current
         return { body: storage.body };
     } else {
         // Need to update the cache

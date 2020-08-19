@@ -10,7 +10,7 @@ module.exports = {
     initialState: 'initial',
     states: {
         initial: async (ctx, state, data) => {
-            // Initiatie authentication
+            // Initiate authentication
 
             Sdk.debug('INITIAL', state, data);
 
@@ -72,17 +72,21 @@ module.exports = {
                     slack_user_access_token: response.body.authed_user && response.body.authed_user.access_token,
                     slack_user_id: response.body.authed_user && response.body.authed_user.id,
                     slack_app_id: response.body.app_id,
+                    slack_team_id: response.body.team && response.body.team.id,
                 };
 
                 if (ctx.configuration.slack_signing_secret) {
                     // Generate and store token the function will later user to call back for
                     // events registration
+                    const tokenLength = 48;
+                    const tokenUses = 2;
+
                     storage.ensureStorage(ctx);
                     await storage.ensureCache();
-                    let token = (await crypto.randomBytes(48)).toString('hex');
+                    let token = (await crypto.randomBytes(tokenLength)).toString('hex');
                     await storage.put(() => {
                         // Store which app this token is for and 2 remaining uses
-                        storage.tokenToApp[token] = [response.body.app_id, 2];
+                        storage.tokenToTeam[token] = [`${data.slack_app_id}-${data.slack_team_id}`, tokenUses];
                     });
                     data.fusebit_events_registration = selfUrl + '/events/registration';
                     data.fusebit_events_token = token;
