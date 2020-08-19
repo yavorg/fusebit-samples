@@ -27,22 +27,21 @@ const getAccessToken = async (ctx) => {
     await Superagent.post('https://auth.atlassian.com/oauth/token')
         .set('Content-Type', 'application/json')
         .send({
-            grant_type: "refresh_token",
+            grant_type: 'refresh_token',
             client_id: ctx.configuration.atlassian_client_id,
             client_secret: ctx.configuration.atlassian_client_secret,
             refresh_token: ctx.body.refresh_token,
-            redirect_uri: Sdk.getSelfUrl(ctx)
+            redirect_uri: Sdk.getSelfUrl(ctx),
         })
-        .then(res => response = res);
+        .then((res) => (response = res));
 
     return response.body.access_token;
 };
 
 /**
-* @param ctx {FusebitContext}
-*/
+ * @param ctx {FusebitContext}
+ */
 module.exports = async (ctx) => {
-
     if (ctx.body.refresh_token) {
         // Request for access token
         return { body: { accessToken: await getAccessToken(ctx) } };

@@ -24,8 +24,8 @@ Whatever happens between initialization and completion is an implementation deta
 
 const getAccessToken = async (ctx) => {
     const oAuth2Client = new google.auth.OAuth2(
-        ctx.configuration.google_client_id, 
-        ctx.configuration.google_client_secret, 
+        ctx.configuration.google_client_id,
+        ctx.configuration.google_client_secret,
         Sdk.getSelfUrl(ctx)
     );
     oAuth2Client.credentials = { refresh_token: ctx.body.refresh_token };
@@ -34,10 +34,9 @@ const getAccessToken = async (ctx) => {
 };
 
 /**
-* @param ctx {FusebitContext}
-*/
+ * @param ctx {FusebitContext}
+ */
 module.exports = async (ctx) => {
-
     if (ctx.body.refresh_token) {
         // Request for access token
         return { body: { accessToken: await getAccessToken(ctx) } };

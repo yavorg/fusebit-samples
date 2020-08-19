@@ -1,12 +1,13 @@
 const Superagent = require('superagent');
 const Sdk = require('@fusebit/add-on-sdk');
-const initialView = require('fs').readFileSync(__dirname + '/initial.html', { encoding: 'utf8' });
+const initialView = require('fs').readFileSync(__dirname + '/initial.html', {
+    encoding: 'utf8',
+});
 const { google } = require('googleapis');
 
 module.exports = {
     initialState: 'initial',
     states: {
-
         initial: async (ctx, state, data) => {
             // Initiatie authentication
 
@@ -18,8 +19,8 @@ module.exports = {
             const selfUrl = Sdk.getSelfUrl(ctx);
 
             const oAuth2Client = new google.auth.OAuth2(
-                ctx.configuration.google_client_id, 
-                ctx.configuration.google_client_secret, 
+                ctx.configuration.google_client_id,
+                ctx.configuration.google_client_secret,
                 selfUrl
             );
 
@@ -29,7 +30,7 @@ module.exports = {
                 prompt: 'consent select_account',
                 redirect_uri: selfUrl,
                 state: Sdk.serializeState(state),
-                response_type: 'code'
+                response_type: 'code',
             });
 
             const view = initialView
@@ -37,8 +38,8 @@ module.exports = {
                 .replace(/##authorizationUrl##/g, authorizationUrl)
                 .replace(/##returnTo##/, JSON.stringify(ctx.query.returnTo))
                 .replace(/##state##/, ctx.query.state ? JSON.stringify(ctx.query.state) : 'null');
-            
-            return {  
+
+            return {
                 body: view,
                 bodyEncoding: 'utf8',
                 headers: { 'content-type': 'text/html' },
@@ -54,38 +55,36 @@ module.exports = {
                 let response;
                 try {
                     const oAuth2Client = new google.auth.OAuth2(
-                        ctx.configuration.google_client_id, 
-                        ctx.configuration.google_client_secret, 
+                        ctx.configuration.google_client_id,
+                        ctx.configuration.google_client_secret,
                         selfUrl
                     );
                     response = await new Promise((resolve, reject) => {
-                        oAuth2Client.getToken(ctx.query.code, (error, token) => error ? reject(error) : resolve(token));
+                        oAuth2Client.getToken(ctx.query.code, (error, token) => (error ? reject(error) : resolve(token)));
                     });
                     if (!response || !response.refresh_token) {
                         throw new Error('Unable to obtain refresh token');
                     }
-                }
-                catch (e) {
-                    throw { 
-                        status: 500, 
-                        message: `Google authentication failed: ${e.message}`, 
-                        state 
+                } catch (e) {
+                    throw {
+                        status: 500,
+                        message: `Google authentication failed: ${e.message}`,
+                        state,
                     };
                 }
-                let data = { 
-                    ...state.data, 
-                    google_refresh_token: response.refresh_token, 
-                    google_get_token_url: `${selfUrl}/token` 
+                let data = {
+                    ...state.data,
+                    google_refresh_token: response.refresh_token,
+                    google_get_token_url: `${selfUrl}/token`,
                 };
                 return Sdk.completeWithSuccess(state, data);
-            }
-            else {
-                throw { 
-                    status: 500, 
-                    message: `Google authentication failed: ${ctx.query.error_description || ctx.query.error || 'Unknown error'}`, 
-                    state 
+            } else {
+                throw {
+                    status: 500,
+                    message: `Google authentication failed: ${ctx.query.error_description || ctx.query.error || 'Unknown error'}`,
+                    state,
                 };
             }
-        }
-    }
+        },
+    },
 };

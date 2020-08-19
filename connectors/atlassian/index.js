@@ -10,4 +10,4 @@ const uninstall = require('./uninstall');
 
 const Sdk = require('@fusebit/add-on-sdk');
 
-module.exports = Sdk.createLifecycleManager({ configure, install, uninstall })
+module.exports = Sdk.createLifecycleManager({ configure, install, uninstall });

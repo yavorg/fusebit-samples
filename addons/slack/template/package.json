@@ -1,10 +1,10 @@
 {
-  "engines": {
-    "node": "10"
-  },
-  "dependencies": {
-    "@fusebit/add-on-sdk": "^1.0.6",
-    "@slack/web-api": "^5.11.0",
-    "superagent": "^5.2.2"
-  }
+    "engines": {
+        "node": "10"
+    },
+    "dependencies": {
+        "@fusebit/add-on-sdk": "^1.0.6",
+        "@slack/web-api": "^5.11.0",
+        "superagent": "^5.2.2"
+    }
 }

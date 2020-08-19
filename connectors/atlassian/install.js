@@ -3,12 +3,12 @@ This is the installation logic of the Lifecycle Manager.
 */
 
 const Fs = require('fs');
-const getTemplateFile = fileName => Fs.readFileSync(__dirname + `/template/${fileName}`, { encoding: 'utf8' });
+const getTemplateFile = (fileName) => Fs.readFileSync(__dirname + `/template/${fileName}`, { encoding: 'utf8' });
 const Sdk = require('@fusebit/add-on-sdk');
 
 module.exports = async (ctx) => {
     // Create the Addon Handler
-    await Sdk.createFunction(ctx, { 
+    await Sdk.createFunction(ctx, {
         configurationSerialized: `# Generate debugging information to logs
 debug=1
 
@@ -31,30 +31,29 @@ fusebit_allowed_return_to=${ctx.body.configuration.fusebit_allowed_return_to}
             files: {
                 'package.json': {
                     engines: {
-                        node: "10"
+                        node: '10',
                     },
                     dependencies: {
-                        "superagent": "^5.2.2",
-                        "@fusebit/add-on-sdk": "^1.0.5"
-                    }
+                        superagent: '^5.2.2',
+                        '@fusebit/add-on-sdk': '^1.0.5',
+                    },
                 },
                 'index.js': getTemplateFile('index.js'),
                 'initial.html': getTemplateFile('initial.html'),
                 'configure.js': getTemplateFile('configure.js'),
-            }
+            },
         },
         metadata: {
             fusebit: {
                 editor: {
                     navigationPanel: {
                         hideFiles: [],
-                    }
-                }
+                    },
+                },
             },
-            ...ctx.body.metadata
-        }
+            ...ctx.body.metadata,
+        },
     });
-    
-    return { status: 200, body: { status: 200 }};
-};
 
+    return { status: 200, body: { status: 200 } };
+};
