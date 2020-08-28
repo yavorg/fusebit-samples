@@ -1,9 +1,9 @@
 {
-    "engines": {
-        "node": "10"
-    },
-    "dependencies": {
-        "superagent": "^5.2.2",
-        "@fusebit/add-on-sdk": "^0.0.1"
-    }
+  "engines": {
+    "node": "10"
+  },
+  "dependencies": {
+    "superagent": "^5.2.2",
+    "@fusebit/add-on-sdk": "^0.0.1"
+  }
 }

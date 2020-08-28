@@ -23,24 +23,24 @@ Whatever happens between initialization and completion is an implementation deta
 */
 
 const getAccessToken = async (ctx) => {
-    const oAuth2Client = new google.auth.OAuth2(
-        ctx.configuration.google_client_id,
-        ctx.configuration.google_client_secret,
-        Sdk.getSelfUrl(ctx)
-    );
-    oAuth2Client.credentials = { refresh_token: ctx.body.refresh_token };
-    const accessToken = (await oAuth2Client.getAccessToken()).token;
-    return accessToken;
+  const oAuth2Client = new google.auth.OAuth2(
+    ctx.configuration.google_client_id,
+    ctx.configuration.google_client_secret,
+    Sdk.getSelfUrl(ctx)
+  );
+  oAuth2Client.credentials = { refresh_token: ctx.body.refresh_token };
+  const accessToken = (await oAuth2Client.getAccessToken()).token;
+  return accessToken;
 };
 
 /**
  * @param ctx {FusebitContext}
  */
 module.exports = async (ctx) => {
-    if (ctx.body.refresh_token) {
-        // Request for access token
-        return { body: { accessToken: await getAccessToken(ctx) } };
-    }
+  if (ctx.body.refresh_token) {
+    // Request for access token
+    return { body: { accessToken: await getAccessToken(ctx) } };
+  }
 
-    return settingsManager(ctx);
+  return settingsManager(ctx);
 };

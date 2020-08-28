@@ -1,34 +1,34 @@
 module.exports = async (confluence, ctx) => {
-    // Simple caching
-    let storage = await ctx.storage.get();
-    const ttl = 180000; // TTL of 3 minutes
+  // Simple caching
+  let storage = await ctx.storage.get();
+  const ttl = 180000; // TTL of 3 minutes
 
-    if (storage && storage.timestamp && storage.timestamp > Date.now() - ttl) {
-        // Cache is current
-        return { body: storage.body };
+  if (storage && storage.timestamp && storage.timestamp > Date.now() - ttl) {
+    // Cache is current
+    return { body: storage.body };
+  } else {
+    // Need to update the cache
+    if (confluence.accessibleResources.length < 1) {
+      return { body: [] };
     } else {
-        // Need to update the cache
-        if (confluence.accessibleResources.length < 1) {
-            return { body: [] };
-        } else {
-            // Assume there is only one Confluence site in this instance
-            confluence.setResource(confluence.accessibleResources[0].id);
+      // Assume there is only one Confluence site in this instance
+      confluence.setResource(confluence.accessibleResources[0].id);
 
-            // Reference https://developer.atlassian.com/cloud/confluence/swagger.v3.json
+      // Reference https://developer.atlassian.com/cloud/confluence/swagger.v3.json
 
-            // Get the space by the name provided in config
-            let space = (await confluence.Space.getSpaces()).body.results.filter((space) => space.name === ctx.space_name);
+      // Get the space by the name provided in config
+      let space = (await confluence.Space.getSpaces()).body.results.filter((space) => space.name === ctx.space_name);
 
-            var result = [];
-            if (space.length > 0) {
-                result = (await confluence.Content.getContent({ spaceKey: space[0].key })).body.results;
-            }
+      var result = [];
+      if (space.length > 0) {
+        result = (await confluence.Content.getContent({ spaceKey: space[0].key })).body.results;
+      }
 
-            // Cache result
-            ctx.storage.put({ body: result, timestamp: Date.now() });
+      // Cache result
+      ctx.storage.put({ body: result, timestamp: Date.now() });
 
-            // Return response
-            return { body: result };
-        }
+      // Return response
+      return { body: result };
     }
+  }
 };
