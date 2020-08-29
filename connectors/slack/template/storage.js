@@ -7,9 +7,7 @@ module.exports.ensureStorage = (ctx) => {
   }
 };
 
-module.exports.teamToHandler = null;
-module.exports.tokenToTeam = null;
-var mappingTimestamp;
+let mappingTimestamp;
 module.exports.get = async () => {
   let result = await storage.get();
   module.exports.teamToHandler = (result && result.teamToHandler) || {};
@@ -33,7 +31,7 @@ module.exports.put = async (applyChanges) => {
       Sdk.debug('Cache conflict');
       if (e.statusCode && e.statusCode == 409) {
         // Local copy is stale, need to refresh
-        await storage.get();
+        await module.exports.get();
       } else throw e;
     }
   }

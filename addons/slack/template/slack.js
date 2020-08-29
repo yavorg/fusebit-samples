@@ -1,6 +1,7 @@
-module.exports = async (slack, ctx) => {
-  // Send "Hello world" to the #{ctx.slack_channel_name} channel on Slack
+// Send "Hello world" to the #{ctx.slack_channel_name} channel on Slack.
+// If using Events API, register a separate handler function as shown below.
 
+module.exports = async (slack, ctx) => {
   // If user access token was requested in addition to bot access token, you can
   // replace `slack.bot` with `slack.user` below to act on behalf of the user. If no
   // user access token is present, `slack.user` will be undefined.
@@ -19,9 +20,10 @@ module.exports = async (slack, ctx) => {
   }
 };
 
-// If using Events API, each event type will be routed to a function named after
-// the event type https://api.slack.com/events. In addition, all events are routed to the
-// function below for easy debugging
+// When using Events API , each event type will be routed to a function named
+// after the event type https://api.slack.com/events. In addition, all events are routed
+// catch-all the function below.
+
 // module.exports.slack = {
 //     all: async (slack, event, ctx) => {
 //         console.log(event);

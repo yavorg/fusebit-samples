@@ -84,8 +84,8 @@ async function listAccessibleResources(accessToken) {
   // [
   //   {
   //     "id": "d0a50dbb-9553-444e-80e3-5080fa25a3b4",
-  //     "url": "https://magitech-test.atlassian.net",
-  //     "name": "magitech-test",
+  //     "url": "https://test.atlassian.net",
+  //     "name": "test",
   //     "scopes": [
   //       "search:confluence",
   //       "read:confluence-props",

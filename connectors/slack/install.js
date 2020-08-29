@@ -7,9 +7,10 @@ const getTemplateFile = (fileName) => Fs.readFileSync(__dirname + `/template/${f
 const Sdk = require('@fusebit/add-on-sdk');
 
 module.exports = async (ctx) => {
+  let storageSpecification = await Sdk.createStorage(ctx);
+
   // Create the Add-On Handler
   await Sdk.createFunction(ctx, {
-    enableStorage: true,
     configurationSerialized: `# Generate debugging information to logs
 debug=1
 
@@ -30,6 +31,12 @@ slack_user_scope=${ctx.body.configuration.slack_user_scope || ''}
 
 # Allowed returnTo URLs. Comma delimited. Use wildcard (*) at the end of a URL to allow for a prefix match
 fusebit_allowed_return_to=${ctx.body.configuration.fusebit_allowed_return_to}
+
+# Storage configuration settings
+${Object.keys(storageSpecification)
+  .sort()
+  .map((k) => `${k}=${storageSpecification[k]}`)
+  .join('\n')}
 `,
     nodejs: {
       files: {
@@ -38,7 +45,7 @@ fusebit_allowed_return_to=${ctx.body.configuration.fusebit_allowed_return_to}
             node: '10',
           },
           dependencies: {
-            '@fusebit/add-on-sdk': '^1.3.1',
+            '@fusebit/add-on-sdk': '^2.0.0',
             superagent: '^5.2.2',
             '@slack/events-api': '^2.3.4',
           },
