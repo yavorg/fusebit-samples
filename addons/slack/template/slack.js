@@ -1,4 +1,4 @@
-// Send "Hello world" to the #{ctx.slack_channel_name} channel on Slack.
+// Send "Hello world" to the ctx.configuration.slack_channel_name channel on Slack.
 // If using Events API, register a separate handler function as shown below.
 
 module.exports = async (slack, ctx) => {
@@ -7,7 +7,7 @@ module.exports = async (slack, ctx) => {
   // user access token is present, `slack.user` will be undefined.
 
   const conversations = await slack.bot.conversations.list();
-  const channel = conversations.channels.filter((c) => c.name === ctx.slack_channel_name);
+  const channel = conversations.channels.filter((c) => c.name === ctx.configuration.slack_channel_name);
   if (channel && channel.length > 0) {
     const result = await slack.bot.chat.postMessage({
       text: `Hello world at ${new Date()}`,

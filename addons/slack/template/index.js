@@ -57,7 +57,7 @@ module.exports = async (ctx) => {
     }
   } else {
     return slack(sdk, {
-      ...ctx.configuration,
+      ...ctx,
       storage: Sdk.getStorageClient(ctx),
     });
   }
