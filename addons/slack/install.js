@@ -31,7 +31,7 @@ ${Object.keys(storageSpecification)
   .join('\n')}
 `,
       nodejs: {
-        files: getTemplateFiles(['index.js', 'package.json', 'slack.js']),
+        files: getTemplateFiles(['index.js', 'package.json', 'slack.js', 'health.js']),
       },
       metadata: {
         fusebit: {

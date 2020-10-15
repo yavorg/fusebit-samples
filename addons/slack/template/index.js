@@ -1,4 +1,5 @@
 const slack = require('./slack.js');
+const health = require('./health.js');
 const Sdk = require('@fusebit/add-on-sdk');
 const { WebClient } = require('@slack/web-api');
 
@@ -55,6 +56,11 @@ module.exports = async (ctx) => {
       Sdk.debug('Dispatching to event handlers failed', e);
       return { status: 500 };
     }
+  } else if (ctx.url.endsWith('health')) {
+    return health(sdk, {
+      ...ctx,
+      storage: Sdk.getStorageClient(ctx),
+    });
   } else {
     return slack(sdk, {
       ...ctx,
