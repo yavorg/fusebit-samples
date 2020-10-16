@@ -7,7 +7,7 @@ module.exports = async (slack, ctx) => {
     await slack.bot.api.test();
   } catch (e) {
     // Only pass through the error code and HTTP status
-    var result = {
+    const result = {
       body: { errorCode: e.code },
       status: 500,
     };

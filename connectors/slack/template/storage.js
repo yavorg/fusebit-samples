@@ -2,7 +2,8 @@ const Sdk = require('@fusebit/add-on-sdk');
 
 let storage;
 module.exports.ensureStorage = (ctx) => {
-  if (!storage) {
+  const twoMinutesFromNow = Date.now() + 2 * 60 * 1000;
+  if (!storage || storage.expiry < twoMinutesFromNow) {
     storage = Sdk.getStorageClient(ctx);
   }
 };

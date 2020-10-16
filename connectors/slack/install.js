@@ -45,7 +45,7 @@ ${Object.keys(storageSpecification)
             node: '10',
           },
           dependencies: {
-            '@fusebit/add-on-sdk': '^2.0.0',
+            '@fusebit/add-on-sdk': '^2.1.0',
             superagent: '^5.2.2',
             '@slack/events-api': '^2.3.4',
           },
