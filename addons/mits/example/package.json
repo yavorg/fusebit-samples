@@ -1,10 +1,6 @@
 {
-  "scripts": {
-    "cxsd": "cxsd"
-  },
   "dependencies": {
     "@wikipathways/cxml": "^0.2.14",
-    "@wikipathways/cxsd": "^0.2.10",
     "source-map-support": "^0.5.19"
   }
 }
