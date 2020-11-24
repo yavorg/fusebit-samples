@@ -6,25 +6,32 @@ const Sdk = require('@fusebit/add-on-sdk');
 const Superagent = require('superagent');
 
 module.exports = async (ctx) => {
-  let functionCtx = await Sdk.getFunctionDefinition(ctx);
+  if (!ctx.caller.permissions) {
+    return { status: 403 };
+  }
 
-  await Sdk.deleteStorage(ctx, functionCtx.configuration);
-  Sdk.debug('Storage deleted', functionCtx.location);
+  const storage = await Sdk.createStorageClient(
+    ctx.body,
+    ctx.fusebit.functionAccessToken,
+    `boundary/${ctx.body.boundaryId}/function/${ctx.body.functionId}`
+  );
+  await storage.delete();
+  Sdk.debug('Storage deleted');
 
   // Deregister Event API
+  let functionCtx = await Sdk.getFunctionDefinition(ctx, ctx.fusebit.functionAccessToken);
   const {
     fusebit_events_registration: registrationUrl,
-    fusebit_events_token: token,
     slack_app_id: app,
     slack_team_id: team_id,
   } = functionCtx.configuration;
   const handler = functionCtx.location + '/events/ingest';
 
-  if (registrationUrl && token) {
+  if (registrationUrl) {
     Sdk.debug('Events API configuration was present');
 
     await Superagent.delete(registrationUrl)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${ctx.fusebit.functionAccessToken}`)
       .query({ app: app })
       .query({ team_id: team_id })
       .query({ handler: encodeURIComponent(handler) });
@@ -32,8 +39,8 @@ module.exports = async (ctx) => {
     Sdk.debug('Events API deregistration succeeded');
   }
 
-  await Sdk.deleteFunction(ctx);
-  Sdk.debug('Function deleted', functionCtx.location);
+  await Sdk.deleteFunction(ctx, ctx.fusebit.functionAccessToken);
+  Sdk.debug('Function deleted');
 
   return { status: 204 };
 };

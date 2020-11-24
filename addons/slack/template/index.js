@@ -3,6 +3,14 @@ const health = require('./health.js');
 const Sdk = require('@fusebit/add-on-sdk');
 const { WebClient } = require('@slack/web-api');
 
+async function getStorageClient(ctx) {
+  return Sdk.createStorageClient(
+    ctx,
+    ctx.fusebit.functionAccessToken,
+    `boundary/${ctx.boundaryId}/function/${ctx.functionId}`
+  );
+}
+
 module.exports = async (ctx) => {
   const sdk = {
     bot: new WebClient(ctx.configuration.slack_bot_access_token),
@@ -12,10 +20,7 @@ module.exports = async (ctx) => {
   if (ctx.url.endsWith('events/ingest')) {
     Sdk.debug('Received Events API event');
 
-    const match = ctx.headers.authorization.match(/^bearer\s+(.+)$/i);
-    const token = match && match[1];
-    if (!token || token !== ctx.configuration.fusebit_events_token) {
-      Sdk.debug('Missing or incorrect auth token');
+    if (!ctx.caller.permissions) {
       return { status: 403 };
     }
 
@@ -30,7 +35,7 @@ module.exports = async (ctx) => {
           const functions = Object.getOwnPropertyNames(handlers)
             .filter((p) => typeof handlers[p] === 'function')
             .filter((f) => f == event.type || f == 'all');
-          const client = Sdk.getStorageClient(ctx);
+          const client = await getStorageClient(ctx);
           const promises = functions.map((f) =>
             handlers[f](sdk, event, {
               ...ctx.configuration,
@@ -53,18 +58,18 @@ module.exports = async (ctx) => {
         };
       }
     } catch (e) {
-      Sdk.debug('Dispatching to event handlers failed', e);
-      return { status: 500 };
+      Sdk.debug('Dispatching message to event handlers failed', e);
+      return { status: 500, body: { message: 'Dispatching message to event handlers failed' } };
     }
   } else if (ctx.url.endsWith('health')) {
     return health(sdk, {
       ...ctx,
-      storage: Sdk.getStorageClient(ctx),
+      storage: await getStorageClient(ctx),
     });
   } else {
     return slack(sdk, {
       ...ctx,
-      storage: Sdk.getStorageClient(ctx),
+      storage: await getStorageClient(ctx),
     });
   }
 };

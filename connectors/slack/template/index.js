@@ -21,11 +21,17 @@ module.exports = async (ctx) => {
   } else {
     if (ctx.configuration.slack_signing_secret) {
       if (pathname.startsWith('/events/ingest') && ctx.method === 'POST') {
-        return await handleEventIngest(ctx);
+        return handleEventIngest(ctx);
       } else if (pathname.startsWith('/events/registration') && ctx.method === 'POST') {
-        return await registerCore(ctx);
+        if (!ctx.caller.permissions) {
+          return { status: 403 };
+        }
+        return registerCore(ctx);
       } else if (pathname.startsWith('/events/registration') && ctx.method === 'DELETE') {
-        return await registerCore(ctx, true);
+        if (!ctx.caller.permissions) {
+          return { status: 403 };
+        }
+        return registerCore(ctx, true);
       } else {
         return { status: 404 };
       }
@@ -98,32 +104,29 @@ async function dispatch(ctx) {
 
   // Route all other events
   if (body && body.api_app_id && body.team_id) {
-    storage.ensureStorage(ctx);
-    await storage.ensureCache();
+    await storage.ensureCache(ctx);
     Sdk.debug('Event is for Team ID', body.api_app_id, body.team_id);
-    let tokens =
-      storage.teamToHandler[body.api_app_id][body.team_id] &&
-      Object.keys(storage.teamToHandler[body.api_app_id][body.team_id]);
-    if (!tokens) {
+    const handlers = storage.teamToHandler[body.api_app_id][body.team_id];
+    if (!handlers) {
       Sdk.debug('No handlers registered for this Team ID, not routing');
       return;
     }
 
-    const promises = tokens.map((t) =>
-      Superagent.post(storage.teamToHandler[body.api_app_id][body.team_id][t])
-        .set('Authorization', `Bearer ${t}`)
-        .send(body.event)
-        .ok((r) => {
-          if (r.status >= 300) {
-            Sdk.debug('Handler error', storage.teamToHandler[body.api_app_id][body.team_id][t], r.body);
-          }
-          return true;
-        })
-    );
-
     try {
+      const promises = handlers.map((h) =>
+        Superagent.post(h)
+          .set('Authorization', `Bearer ${ctx.fusebit.functionAccessToken}`)
+          .send(body.event)
+          .ok((r) => {
+            if (r.status >= 300) {
+              Sdk.debug('Handler error', h, r.body);
+            }
+            return true;
+          })
+      );
+
       await Promise.all(promises);
-      Sdk.debug(`Routed ${tokens.length} requests`);
+      Sdk.debug(`Routed ${handlers.length} requests`);
     } catch (error) {
       Sdk.debug('Routing error', error);
     }
@@ -134,21 +137,10 @@ async function dispatch(ctx) {
 }
 
 async function registerCore(ctx, isDeregister) {
-  if (!ctx.headers.authorization) {
-    Sdk.debug('Missing auth token in request');
+  if (!ctx.caller.permissions) {
     return { status: 403 };
   }
-
-  storage.ensureStorage(ctx);
-
-  await storage.get();
-
-  const match = ctx.headers.authorization.match(/^bearer\s+(.+)$/i);
-  const token = match && match[1];
-  if (!token || !storage.tokenToTeam[token]) {
-    Sdk.debug('Invalid auth token, or using an unknown token');
-    return { status: 403 };
-  }
+  await storage.ensureCache(ctx);
 
   let team, app, handler;
   if (!isDeregister) {
@@ -157,73 +149,50 @@ async function registerCore(ctx, isDeregister) {
         status: 400,
         body: { message: 'Missing required app, team_id, and handler body parameters' },
       };
-    } else {
-      team = ctx.body.team_id;
-      app = ctx.body.app;
-      handler = ctx.body.handler;
     }
+    team = ctx.body.team_id;
+    app = ctx.body.app;
+    handler = ctx.body.handler;
   } else {
     if (!ctx.query || !ctx.query.app || !ctx.query.team_id || !ctx.query.handler) {
       return {
         status: 400,
         body: { message: 'Missing required app, team_id, and handler query parameters' },
       };
-    } else {
-      team = ctx.query.team_id;
-      app = ctx.query.app;
-      handler = decodeURIComponent(ctx.query.handler);
     }
+    team = ctx.query.team_id;
+    app = ctx.query.app;
+    handler = decodeURIComponent(ctx.query.handler);
   }
 
-  const badToken = 'Bad token';
-  try {
-    await storage.put(() => {
-      // Doing the token use check in here in case there is a storage conflict
-      // and when the data is refreshed, it turns out the token was used up
-
-      if (
-        !storage.tokenToTeam[token] ||
-        !storage.tokenToTeam[token].team_id ||
-        !storage.tokenToTeam[token].app_id ||
-        storage.tokenToTeam[token].team_id !== team ||
-        storage.tokenToTeam[token].app_id !== app
-      ) {
-        let e = new Error();
-        e.name = badToken;
-        throw e;
+  await storage.put(ctx, () => {
+    if (!isDeregister) {
+      Sdk.debug('Registering', handler, team);
+      if (!storage.teamToHandler[app]) {
+        storage.teamToHandler[app] = {};
       }
-
-      if (!isDeregister) {
-        Sdk.debug('Registering', handler, team);
-        if (!storage.teamToHandler[app]) {
-          storage.teamToHandler[app] = {};
-        }
-        if (!storage.teamToHandler[app][team]) {
-          storage.teamToHandler[app][team] = {};
-        }
-        // Always overwrite the handler for this token for reentrancy
-        storage.teamToHandler[app][team][token] = handler;
-      } else {
-        Sdk.debug('Deregistering', handler, team);
-        delete storage.teamToHandler[app][team][token];
-        if (Object.keys(storage.teamToHandler[app][team]).length == 0) {
-          delete storage.teamToHandler[app][team];
-        }
-        if (Object.keys(storage.teamToHandler[app]).length === 0) {
-          delete storage.teamToHandler[app];
-        }
-
-        // Invalidate token
-        Sdk.debug('Token revoke');
-        delete storage.tokenToTeam[token];
+      if (!storage.teamToHandler[app][team]) {
+        storage.teamToHandler[app][team] = [];
       }
-    });
-  } catch (e) {
-    if (e.name === badToken) {
-      Sdk.debug('Invalid token');
-      return { status: 403 };
-    } else throw e;
-  }
+      if (!storage.teamToHandler[app][team].includes(handler)) {
+        // Avoid duplicate registrations
+        storage.teamToHandler[app][team].push(handler);
+      }
+    } else {
+      Sdk.debug('Deregistering', handler, team);
+
+      const index = storage.teamToHandler[app][team].indexOf(handler);
+      if (index !== -1) {
+        storage.teamToHandler[app][team].splice(index, 1);
+      }
+      if (Object.keys(storage.teamToHandler[app][team]).length == 0) {
+        delete storage.teamToHandler[app][team];
+      }
+      if (Object.keys(storage.teamToHandler[app]).length === 0) {
+        delete storage.teamToHandler[app];
+      }
+    }
+  });
 
   return {
     status: 200,

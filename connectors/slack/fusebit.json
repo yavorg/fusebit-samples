@@ -4,7 +4,7 @@
     "authorization": [
       {
         "action": "function:execute",
-        "resource": "/account/{{accountId}}/subscription/{{subscriptionId}}/boundary/{{boundaryId}}/functions/{{functionId}}/"
+        "resource": "/account/{{accountId}}/subscription/{{subscriptionId}}/boundary/{{boundaryId}}/function/{{functionId}}/"
       }
     ],
     "functionPermissions": {

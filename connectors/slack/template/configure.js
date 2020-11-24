@@ -82,29 +82,14 @@ module.exports = {
         // with Slack. So we need to be able to route incoming events to all addon instances that are
         // created for users of this app + team (workspace). The way this works is as follows:
         //
-        // 1. Here we generate and store a bearer token associated with the app+team that the user
-        // just authorized. It is then sent back in the config blob along with the registration URL
-        // to call with that token.
+        // 1. During addon install, the addon template makes a call to register the addon URL it just created
+        // to receive events
         //
-        // 2. During addon install, the addon template makes the first use of the token to register
-        // the addon URL it just created to receive events
-        //
-        // 3. During addon uninstall, it makes the second call to deregister itself and the token is revoked
+        // 2. During addon uninstall, it makes the second call to deregister the instance
         //
         if (ctx.configuration.slack_signing_secret) {
-          const tokenLength = 48;
-
-          storage.ensureStorage(ctx);
-          await storage.ensureCache();
-          let token = (await crypto.randomBytes(tokenLength)).toString('hex');
-          await storage.put(() => {
-            storage.tokenToTeam[token] = {
-              app_id: data.slack_app_id,
-              team_id: data.slack_team_id,
-            };
-          });
           data.fusebit_events_registration = selfUrl + '/events/registration';
-          data.fusebit_events_token = token;
+          data.fusebit_events_resource_path = `/account/${ctx.accountId}/subscription/${ctx.subscriptionId}/boundary/${ctx.boundaryId}/function/${ctx.functionId}/`;
         }
 
         return Sdk.completeWithSuccess(state, data);

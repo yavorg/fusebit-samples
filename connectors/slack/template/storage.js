@@ -1,47 +1,73 @@
 const Sdk = require('@fusebit/add-on-sdk');
 
-let storage;
-module.exports.ensureStorage = (ctx) => {
-  const twoMinutesFromNow = Date.now() + 2 * 60 * 1000;
-  if (!storage || storage.expiry < twoMinutesFromNow) {
-    storage = Sdk.getStorageClient(ctx);
+let mappingTimestamp;
+let etag;
+const cacheTTL = 15000; // 15 seconds
+const storagePath = 'teamToHandler';
+
+async function getStorageClient(ctx) {
+  return await Sdk.createStorageClient(
+    ctx,
+    ctx.fusebit.functionAccessToken,
+    `boundary/${ctx.boundaryId}/function/${ctx.functionId}`
+  );
+}
+
+module.exports.get = async (ctx) => {
+  const storage = await getStorageClient(ctx);
+  let result = await storage.get(storagePath);
+  if (result && result.data) {
+    module.exports.teamToHandler = result.data;
+    mappingTimestamp = Date.now();
+    etag = result.etag;
   }
 };
 
-let mappingTimestamp;
-module.exports.get = async () => {
-  let result = await storage.get();
-  module.exports.teamToHandler = (result && result.teamToHandler) || {};
-  module.exports.tokenToTeam = (result && result.tokenToTeam) || {};
-  mappingTimestamp = Date.now();
-};
+module.exports.put = async (ctx, applyChanges) => {
+  const storage = await getStorageClient(ctx);
 
-module.exports.put = async (applyChanges) => {
   while (true) {
     // TODO Maybe add some backoff?
 
-    applyChanges();
+    if (typeof applyChanges === 'function') {
+      applyChanges();
+    }
 
     try {
-      await storage.put({
-        teamToHandler: module.exports.teamToHandler,
-        tokenToTeam: module.exports.tokenToTeam,
-      });
+      const payload = {
+        data: {
+          teamToHandler: module.exports.teamToHandler,
+        },
+      };
+      if (etag) {
+        payload.etag = etag;
+      }
+      const response = await storage.put(payload, storagePath);
+      etag = response.etag;
       break;
     } catch (e) {
-      Sdk.debug('Cache conflict');
       if (e.statusCode && e.statusCode == 409) {
+        Sdk.debug('Cache conflict');
+
         // Local copy is stale, need to refresh
         await module.exports.get();
-      } else throw e;
+      } else {
+        throw e;
+      }
     }
   }
 };
 
-module.exports.ensureCache = async () => {
-  // If no in-memory cache present, or the cache is more than 15 sec old,
+module.exports.ensureCache = async (ctx) => {
+  // If no in-memory cache present, or the cache is older than the TTL,
   // reload from storage
-  if (!module.exports.teamToHandler || !module.exports.tokenToTeam || mappingTimestamp < Date.now() - 15000) {
-    await module.exports.get();
+  if (!module.exports.teamToHandler || mappingTimestamp < Date.now() - cacheTTL) {
+    await module.exports.get(ctx);
+
+    // If storage has never been used before, initialize things
+    if (!module.exports.teamToHandler) {
+      module.exports.teamToHandler = {};
+      await module.exports.put(ctx);
+    }
   }
 };
