@@ -4,6 +4,6 @@
   },
   "dependencies": {
     "superagent": "^5.2.2",
-    "@fusebit/add-on-sdk": "^1.0.6"
+    "@fusebit/add-on-sdk": "^3.0.1"
   }
 }

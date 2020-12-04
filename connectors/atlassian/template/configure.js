@@ -73,6 +73,7 @@ module.exports = {
           ...state.data,
           atlassian_refresh_token: response.body.refresh_token,
           atlassian_get_token_url: `${selfUrl}/token`,
+          atlassian_resource_path: `/account/${ctx.accountId}/subscription/${ctx.subscriptionId}/boundary/${ctx.boundaryId}/function/${ctx.functionId}/`,
         };
         return Sdk.completeWithSuccess(state, data);
       } else {

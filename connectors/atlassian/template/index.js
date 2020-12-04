@@ -35,7 +35,7 @@ const getAccessToken = async (ctx) => {
     })
     .then((res) => (response = res));
 
-  return response.body.access_token;
+  return response.body;
 };
 
 /**
@@ -43,8 +43,12 @@ const getAccessToken = async (ctx) => {
  */
 module.exports = async (ctx) => {
   if (ctx.body.refresh_token) {
+    if (!ctx.caller.permissions) {
+      return { status: 403 };
+    }
+
     // Request for access token
-    return { body: { accessToken: await getAccessToken(ctx) } };
+    return { body: await getAccessToken(ctx) };
   }
 
   return settingsManager(ctx);

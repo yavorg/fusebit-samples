@@ -3,16 +3,22 @@ This is the uninstallation logic of the Lifecycle Manager.
 */
 
 const Sdk = require('@fusebit/add-on-sdk');
-const Superagent = require('superagent');
 
 module.exports = async (ctx) => {
-  let functionCtx = await Sdk.getFunctionDefinition(ctx);
+  if (!ctx.caller.permissions) {
+    return { status: 403 };
+  }
 
-  await Sdk.deleteStorage(ctx, functionCtx.configuration);
-  Sdk.debug('Storage deleted', functionCtx.location);
+  const storage = await Sdk.createStorageClient(
+    ctx.body,
+    ctx.fusebit.functionAccessToken,
+    `boundary/${ctx.body.boundaryId}/function/${ctx.body.functionId}`
+  );
+  await storage.delete();
+  Sdk.debug('Storage deleted');
 
-  await Sdk.deleteFunction(ctx);
-  Sdk.debug('Function deleted', functionCtx.location);
+  await Sdk.deleteFunction(ctx, ctx.fusebit.functionAccessToken);
+  Sdk.debug('Function deleted');
 
   return { status: 204 };
 };

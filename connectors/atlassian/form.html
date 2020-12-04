@@ -72,7 +72,6 @@
           const state = ##state##;
           const data = ##data##;
           const [params, setParams] = React.useState({
-              atlassian_host_url: '',
               atlassian_client_id: '',
               atlassian_client_secret: '',
               atlassian_scope: 'read:jira-user',
@@ -150,7 +149,6 @@
                       <Grid container spacing={2}>
                           <Grid item xs={12}>
                               <Grid container spacing={2}>
-                                  {getInput('atlassian_host_url', 'Atlassian Instance URL', 'Base instance URL, such as https://instance.atlassian.net')}
                                   {getInput('atlassian_client_id', 'Atlassian Client ID', 'OAuth client ID of your Atlassian App')}
                                   {getInput('atlassian_client_secret', 'Atlassian Client Secret', 'OAuth client secret of the Atlassian App')}
                                   {getInput('atlassian_scope', 'Atlassian OAuth Scopes', 'Default OAuth scopes to request, space delimited')}

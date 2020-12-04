@@ -4,7 +4,8 @@ This is the installation logic of the Lifecycle Manager.
 
 const Fs = require('fs');
 const Sdk = require('@fusebit/add-on-sdk');
-const Superagent = require('superagent');
+
+const resourcePath = 'atlassian_resource_path';
 
 const getTemplateFiles = (fileNames) =>
   fileNames.reduce((a, c) => {
@@ -13,25 +14,43 @@ const getTemplateFiles = (fileNames) =>
   }, {});
 
 module.exports = async (ctx) => {
-  let storageSpecification = await Sdk.createStorage(ctx);
+  if (!ctx.caller.permissions) {
+    return { status: 403 };
+  }
+
+  // Capture resource path and remove it as we will not need it in the addon instance
+  let tokenResourcePath = ctx.body.configuration[resourcePath];
+  delete ctx.body.configuration[resourcePath];
 
   // Create the Add-On Handler
-  try {
-    await Sdk.createFunction(ctx, {
+  await Sdk.createFunction(
+    ctx,
+    {
       configurationSerialized: `# Add-on configuration settings
 ${Object.keys(ctx.body.configuration)
   .sort()
   .map((k) => `${k}=${ctx.body.configuration[k]}`)
   .join('\n')}
-
-  # Storage configuration settings
-${Object.keys(storageSpecification)
-  .sort()
-  .map((k) => `${k}=${storageSpecification[k]}`)
-  .join('\n')}
 `,
       nodejs: {
         files: getTemplateFiles(['index.js', 'package.json', 'jira.js']),
+      },
+      security: {
+        functionPermissions: {
+          allow: [
+            {
+              // :execute connector instance
+              action: 'function:execute',
+              resource: tokenResourcePath,
+            },
+            {
+              // :post to its own storage
+              action: 'storage:*',
+              resource:
+                '/account/{{accountId}}/subscription/{{subscriptionId}}/storage/boundary/{{boundaryId}}/function/{{functionId}}/',
+            },
+          ],
+        },
       },
       metadata: {
         fusebit: {
@@ -43,12 +62,9 @@ ${Object.keys(storageSpecification)
         },
         ...ctx.body.metadata,
       },
-    });
-  } catch (e) {
-    // Could not create function, clean up storage
-    await Sdk.deleteStorage(ctx, storageSpecification);
-    throw e;
-  }
+    },
+    ctx.fusebit.functionAccessToken
+  );
 
   return { status: 200, body: { status: 200 } };
 };
